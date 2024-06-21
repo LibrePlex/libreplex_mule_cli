@@ -8,7 +8,11 @@ use libreplex_nico::{AccountData, Nico};
 use mpl_token_metadata::{accounts::Metadata, types::TokenStandard};
 use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_program::pubkey;
-use solana_sdk::{account::ReadableAccount, account_info::AccountInfo, instruction::AccountMeta};
+use solana_sdk::{
+    account::{self, ReadableAccount},
+    account_info::AccountInfo,
+    instruction::AccountMeta,
+};
 use spl_associated_token_account::get_associated_token_address_with_program_id;
 
 pub const AUTH_RULES_PROGRAM_ID: Pubkey = pubkey!("auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg");
@@ -147,39 +151,46 @@ pub fn handle_swap_to_fungible(args: SwapToFungibleArgs) -> Result<()> {
     let account_non_fungible = config.client.get_account(&args.non_fungible_asset)?;
     let data_non_fungible = account_non_fungible.data();
 
-    let account_metadata = config.client.get_account(&metadata)?;
-    let data_metadata = account_metadata.data();
+    // if it is a mint, then grab some metadata as well
 
-    if account_metadata.owner == MPL_TOKEN_METADATA_ID {
-        let metadata_obj = Metadata::from_bytes(data_metadata)?;
-        match metadata_obj.token_standard {
-            Some(x) => match &x {
-                TokenStandard::ProgrammableNonFungible => match metadata_obj.programmable_config {
-                    Some(x) => match &x {
-                        mpl_token_metadata::types::ProgrammableConfig::V1 { rule_set } => {
-                            if let Some(x) = rule_set {
-                                remaining_accounts.push(AccountMeta {
-                                    pubkey: *x,
-                                    is_signer: false,
-                                    is_writable: false,
-                                });
-                            }
+    let mut account_datas: Vec<AccountData> = vec![];
+    let account_metadata = config.client.get_account(&metadata);
+    let mut data_metadata: Vec<u8> = vec![];
+    if let Some(md) = account_metadata.ok() {
+        if md.owner == MPL_TOKEN_METADATA_ID {
+            let metadata_obj = Metadata::from_bytes(md.data())?;
+            data_metadata.append(&mut md.data().to_vec());
+            match metadata_obj.token_standard {
+                Some(x) => match &x {
+                    TokenStandard::ProgrammableNonFungible => {
+                        match metadata_obj.programmable_config {
+                            Some(x) => match &x {
+                                mpl_token_metadata::types::ProgrammableConfig::V1 { rule_set } => {
+                                    if let Some(x) = rule_set {
+                                        remaining_accounts.push(AccountMeta {
+                                            pubkey: *x,
+                                            is_signer: false,
+                                            is_writable: false,
+                                        });
+                                    }
+                                }
+                            },
+                            None => {}
                         }
-                    },
-                    None => {}
+                    }
+                    _ => {}
                 },
-                _ => {}
-            },
-            None => todo!(),
+                None => todo!(),
+            }
+            account_datas.push(AccountData {
+                pubkey: metadata,
+                data: &data_metadata,
+            });
         }
     }
-    let account_datas = [AccountData {
-        pubkey: metadata,
-        data: data_metadata,
-    }];
     let nico: Nico = Nico::from_raw_data(
         args.non_fungible_asset,
-        data_fungible.owner,
+        account_non_fungible.owner,
         data_non_fungible,
         None,
         None,

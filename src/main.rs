@@ -23,9 +23,11 @@ async fn main() -> Result<()> {
             auto_generate_swap_marker,
             filter,
             fungible_mint,
+            update_auth
         } => handle_create(CreateArgs {
             keypair_path,
             rpc_url,
+            update_auth,
             base_swap_rate,
             auto_generate_swap_marker,
             filter: match filter {

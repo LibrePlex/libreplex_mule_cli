@@ -33,6 +33,9 @@ pub enum Commands {
         /// auto-generate swap markers on swap as long as the NFT matches the filter.
         #[arg(long)]
         auto_generate_swap_marker: bool,
+
+        #[arg(long)]
+        update_auth: Option<Pubkey>,
   
         /// Filter that defines what assets are swappable in this mule deployment
         #[arg(long)]

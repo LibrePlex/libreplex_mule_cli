@@ -10,6 +10,7 @@ pub struct CreateArgs {
     pub filter: Filter,
     pub fungible_mint: Pubkey,
     pub priority: Priority,
+    pub update_auth: Option<Pubkey>
 }
 
 pub fn handle_create(args: CreateArgs) -> Result<()> {
@@ -32,6 +33,7 @@ pub fn handle_create(args: CreateArgs) -> Result<()> {
     let ix_args = CreateMuleInstructionArgs {
         seed: seed.pubkey(),
         base_swap_rate: args.base_swap_rate,
+        update_auth: args.update_auth,
         auto_generate_swap_marker: args.auto_generate_swap_marker,
         filter: args.filter,
     };
