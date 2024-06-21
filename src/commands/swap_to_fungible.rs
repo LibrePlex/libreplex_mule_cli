@@ -148,18 +148,39 @@ pub fn handle_swap_to_fungible(args: SwapToFungibleArgs) -> Result<()> {
         });
     }
 
-    let account_non_fungible = config.client.get_account(&args.non_fungible_asset)?;
-    let data_non_fungible = account_non_fungible.data();
-
+    let mut account_non_fungible = config.client.get_account(&args.non_fungible_asset)?;
+    let data_non_fungible = AccountInfo::new(
+        &args.non_fungible_asset,
+        false,
+        false,
+        &mut account_non_fungible.lamports,
+        &mut account_non_fungible.data,
+        &account_non_fungible.owner,
+        account_non_fungible.executable,
+        account_non_fungible.rent_epoch,
+    );
+    
     // if it is a mint, then grab some metadata as well
 
-    let mut account_datas: Vec<AccountData> = vec![];
     let account_metadata = config.client.get_account(&metadata);
-    let mut data_metadata: Vec<u8> = vec![];
-    if let Some(md) = account_metadata.ok() {
+    let mut metadata_data: Option<AccountInfo> = None;
+
+    let mut lamports = 0;
+    let mut data: Vec<u8> = vec![];
+    if let Some(mut md) = account_metadata.ok() {
         if md.owner == MPL_TOKEN_METADATA_ID {
             let metadata_obj = Metadata::from_bytes(md.data())?;
-            data_metadata.append(&mut md.data().to_vec());
+            data.append(&mut md.data);
+            metadata_data = Some(AccountInfo::new(
+                &metadata,
+                false,
+                false,
+                &mut lamports,
+                &mut data,
+                &MPL_TOKEN_METADATA_ID,
+                md.executable,
+                md.rent_epoch,
+            ));
             match metadata_obj.token_standard {
                 Some(x) => match &x {
                     TokenStandard::ProgrammableNonFungible => {
@@ -182,19 +203,21 @@ pub fn handle_swap_to_fungible(args: SwapToFungibleArgs) -> Result<()> {
                 },
                 None => todo!(),
             }
-            account_datas.push(AccountData {
+            remaining_accounts.push(AccountMeta {
                 pubkey: metadata,
-                data: &data_metadata,
+                is_signer: false,
+                is_writable: true,
             });
         }
     }
     let nico: Nico = Nico::from_raw_data(
-        args.non_fungible_asset,
-        account_non_fungible.owner,
-        data_non_fungible,
+        &data_non_fungible,
+        match &metadata_data {
+            Some(x) => Some(&x),
+            None => None,
+        },
         None,
         None,
-        &account_datas,
     );
 
     let target_ata = get_associated_token_address_with_program_id(

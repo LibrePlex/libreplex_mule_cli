@@ -2112,7 +2112,7 @@ dependencies = [
 
 [[package]]
 name = "libreplex_nico"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -2367,7 +2367,7 @@ dependencies = [
 
 [[package]]
 name = "mule-cli"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "bincode",
