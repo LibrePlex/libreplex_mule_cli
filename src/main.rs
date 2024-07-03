@@ -23,13 +23,24 @@ async fn main() -> Result<()> {
             auto_generate_swap_marker,
             filter,
             fungible_mint,
-            update_auth
+            update_auth,
+            fee_per_swap_lamports,
+            fee_rate_per_swap_basis_points,
+            swap_fee_treasury,
+            fee_per_swap_spl_amount,
+            burn_spl_basis_points,
+            name,
         } => handle_create(CreateArgs {
             keypair_path,
             rpc_url,
             update_auth,
             base_swap_rate,
             auto_generate_swap_marker,
+            fee_per_swap_lamports,
+            fee_rate_per_swap_basis_points,
+            swap_fee_treasury,
+            burn_spl_basis_points,
+            fee_per_swap_spl_amount,
             filter: match filter {
                 mule_cli::transaction::Filter::All => Filter::All,
                 mule_cli::transaction::Filter::Group { group_id } => Filter::Group { group_id },
@@ -39,6 +50,7 @@ async fn main() -> Result<()> {
             },
             fungible_mint,
             priority,
+            name
         }),
         Commands::SwapToFungible {
             priority,
@@ -53,7 +65,7 @@ async fn main() -> Result<()> {
             asset_group,
             non_fungible_asset,
             non_fungible_source_token_account,
-            priority
+            priority,
         }),
     }
 }

@@ -47,6 +47,21 @@ pub enum Commands {
 
         #[arg(short = 'P', long, default_value = "low")]
         priority: Priority,
+
+        #[arg(long)]
+        fee_per_swap_lamports: Option<u64>,
+        #[arg(long)]
+        fee_rate_per_swap_basis_points: Option<u16>,
+        #[arg(long)]
+        swap_fee_treasury: Option<Pubkey>,
+        #[arg(long)]
+        fee_per_swap_spl_amount: Option<u64>,
+        #[arg(long)]
+        burn_spl_basis_points: Option<u16>,
+        #[arg(long)]
+        name: String,
+        
+
     },
     /// Swap NFT to fungible under a given mule deployment
     SwapToFungible {

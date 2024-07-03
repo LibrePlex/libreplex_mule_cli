@@ -10,7 +10,13 @@ pub struct CreateArgs {
     pub filter: Filter,
     pub fungible_mint: Pubkey,
     pub priority: Priority,
-    pub update_auth: Option<Pubkey>
+    pub update_auth: Option<Pubkey>,
+    pub fee_per_swap_lamports: Option<u64>,
+    pub fee_rate_per_swap_basis_points: Option<u16>,
+    pub swap_fee_treasury: Option<Pubkey>,
+    pub fee_per_swap_spl_amount: Option<u64>,
+    pub burn_spl_basis_points: Option<u16>,
+    pub name: String,
 }
 
 pub fn handle_create(args: CreateArgs) -> Result<()> {
@@ -36,6 +42,12 @@ pub fn handle_create(args: CreateArgs) -> Result<()> {
         update_auth: args.update_auth,
         auto_generate_swap_marker: args.auto_generate_swap_marker,
         filter: args.filter,
+        fee_per_swap_lamports: args.fee_per_swap_lamports,
+        fee_rate_per_swap_basis_points: args.fee_rate_per_swap_basis_points,
+        swap_fee_treasury: args.swap_fee_treasury,
+        fee_per_swap_spl_amount: args.fee_per_swap_spl_amount,
+        name: args.name,
+        burn_spl_basis_points: args.burn_spl_basis_points,
     };
 
 
