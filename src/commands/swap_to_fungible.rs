@@ -274,7 +274,6 @@ pub fn handle_swap_to_fungible(args: SwapToFungibleArgs) -> Result<()> {
         payer: authority,
         swapper: authority,
         mule: args.mule,
-        authority,
         cosigner: None,
         swap_marker: swap_marker,
         non_fungible_asset: args.non_fungible_asset,
@@ -284,7 +283,6 @@ pub fn handle_swap_to_fungible(args: SwapToFungibleArgs) -> Result<()> {
         non_fungible_source_token_account: args.non_fungible_source_token_account,
         system_program: system_program::ID,
         associated_token_program: spl_associated_token_account::ID,
-        non_fungible_current_owner: Some(authority),
     }
     .instruction_with_remaining_accounts(remaining_accounts.as_slice());
 
